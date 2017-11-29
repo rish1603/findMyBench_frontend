@@ -1,25 +1,25 @@
 import React from 'react';
-import { ActivityIndicator, Button, Clipboard, Image, Share,
-    StatusBar, StyleSheet, Text, TouchableOpacity, View,
+import {
+    ActivityIndicator,
+    Button,
+    Clipboard,
+    Image,
+    Share,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import Exponent, { Constants, ImagePicker, registerRootComponent } from 'expo';
 
-export default class SettingsScreen extends React.Component {
-    static navigationOptions = {
-        title: 'app.json',
-    };
-
+export default class App extends React.Component {
     state = {
         image: null,
         uploading: false,
     };
 
     render() {
-        /* Go ahead and delete ExpoConfigView and replace it with your
-         * content, we just wanted to give you a quick view of your config */
-        // return (
-        //     <Text>SEX PLS</Text>
-        // );
         let { image } = this.state;
 
         return (
@@ -31,9 +31,15 @@ export default class SettingsScreen extends React.Component {
                         textAlign: 'center',
                         marginHorizontal: 15,
                     }}>
+                    Example: Upload ImagePicker result
                 </Text>
 
-                <Button onPress={this._takePhoto} title="Capture Bench" />
+                <Button
+                    onPress={this._pickImage}
+                    title="Pick an image from camera roll"
+                />
+
+                <Button onPress={this._takePhoto} title="Take a photo" />
 
                 {this._maybeRenderImage()}
                 {this._maybeRenderUploadingOverlay()}
@@ -41,8 +47,8 @@ export default class SettingsScreen extends React.Component {
                 <StatusBar barStyle="default" />
             </View>
         );
-
     }
+
     _maybeRenderUploadingOverlay = () => {
         if (this.state.uploading) {
             return (
@@ -120,6 +126,15 @@ export default class SettingsScreen extends React.Component {
         this._handleImagePicked(pickerResult);
     };
 
+    _pickImage = async () => {
+        let pickerResult = await ImagePicker.launchImageLibraryAsync({
+            allowsEditing: true,
+            aspect: [4, 3],
+        });
+
+        this._handleImagePicked(pickerResult);
+    };
+
     _handleImagePicked = async pickerResult => {
         let uploadResponse, uploadResult;
 
@@ -141,6 +156,7 @@ export default class SettingsScreen extends React.Component {
         }
     };
 }
+
 async function uploadImageAsync(uri) {
     let apiUrl = 'https://file-upload-example-backend-dkhqoilqqn.now.sh/upload';
 
@@ -174,5 +190,3 @@ async function uploadImageAsync(uri) {
 
     return fetch(apiUrl, options);
 }
-
-
