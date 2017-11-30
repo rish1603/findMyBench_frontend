@@ -142,15 +142,15 @@ export default class SettingsScreen extends React.Component {
     };
 }
 async function uploadImageAsync(uri) {
-    let apiUrl = 'https://file-upload-example-backend-dkhqoilqqn.now.sh/upload';
+    // let apiUrl = 'https://file-upload-example-backend-dkhqoilqqn.now.sh/upload';
 
     // Note:
     // Uncomment this if you want to experiment with local server
-    //
+
     // if (Constants.isDevice) {
     //   apiUrl = `https://your-ngrok-subdomain.ngrok.io/upload`;
     // } else {
-    //   apiUrl = `http://localhost:3000/upload`
+      apiUrl = `http://165.227.239.135:8080`
     // }
 
     let uriParts = uri.split('.');
@@ -175,4 +175,15 @@ async function uploadImageAsync(uri) {
     return fetch(apiUrl, options);
 }
 
+_getLocationAsync = async () => {
+    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    if (status !== 'granted') {
+        this.setState({
+            errorMessage: 'Permission to access location was denied',
+        });
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    this.setState({ location });
+};
 
