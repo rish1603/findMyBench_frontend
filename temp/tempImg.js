@@ -1,28 +1,25 @@
 import React from 'react';
-import { ActivityIndicator, Button, Clipboard, Image, Share,
-    StatusBar, StyleSheet, Text, TouchableOpacity, View, Platform
+import {
+    ActivityIndicator,
+    Button,
+    Clipboard,
+    Image,
+    Share,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import Exponent, { Constants, ImagePicker, registerRootComponent, Permissions, Location } from 'expo';
-import * as text_en from '../constants/text_en';
+import Exponent, { Constants, ImagePicker, registerRootComponent } from 'expo';
 
-export default class SettingsScreen extends React.Component {
-    static navigationOptions = {
-        title: 'app.json',
-    };
-
+export default class App extends React.Component {
     state = {
         image: null,
         uploading: false,
-        location: null,
-        errorMessage: null,
     };
 
     render() {
-        /* Go ahead and delete ExpoConfigView and replace it with your
-         * content, we just wanted to give you a quick view of your config */
-        // return (
-        //     <Text>SEX PLS</Text>
-        // );
         let { image } = this.state;
 
         return (
@@ -34,18 +31,24 @@ export default class SettingsScreen extends React.Component {
                         textAlign: 'center',
                         marginHorizontal: 15,
                     }}>
+                    Example: Upload ImagePicker result
                 </Text>
 
-                <Button onPress={this._takePhoto} title="Capture Bench" />
-                <Button onPress={this.getLocationAsync} title="Log GPS" />
+                <Button
+                    onPress={this._pickImage}
+                    title="Pick an image from camera roll"
+                />
+
+                <Button onPress={this._takePhoto} title="Take a photo" />
 
                 {this._maybeRenderImage()}
                 {this._maybeRenderUploadingOverlay()}
+
                 <StatusBar barStyle="default" />
             </View>
         );
-
     }
+
     _maybeRenderUploadingOverlay = () => {
         if (this.state.uploading) {
             return (
@@ -122,34 +125,18 @@ export default class SettingsScreen extends React.Component {
 
         this._handleImagePicked(pickerResult);
     };
-    // _getLocationAsync = async () => {
-    //     let { status } = await Permissions.askAsync(Permissions.LOCATION);
-    //     if (status !== 'granted') {
-    //         this.setState({
-    //             errorMessage: 'Permission to access location was denied',
-    //         });
-    //         let text = JSON.stringify(this.state.location);
-    //         console.log(text);
-    //     }
-    //
-    //     let location = await Location.getCurrentPositionAsync({});
-    //     this.setState({ location });
-    // };
-    getLocationAsync = async () =>{
-        const { Location, Permissions } = Expo;
-        const { status } = await Permissions.getAsync(Permissions.LOCATION);
-        if (status === 'granted') {
-            let location = await  Location.getCurrentPositionAsync({enableHighAccuracy: true});
-            console.log(JSON.stringify(location));
-            return location;
-        } else {
-            throw new Error('Location permission not granted');
-        }
+
+    _pickImage = async () => {
+        let pickerResult = await ImagePicker.launchImageLibraryAsync({
+            allowsEditing: true,
+            aspect: [4, 3],
+        });
+
+        this._handleImagePicked(pickerResult);
     };
 
-
     _handleImagePicked = async pickerResult => {
-        let uploadResponse, uploadResult, uploadLocation;
+        let uploadResponse, uploadResult;
 
         try {
             this.setState({ uploading: true });
@@ -169,16 +156,23 @@ export default class SettingsScreen extends React.Component {
         }
     };
 }
-async function uploadImageAsync(uri) {
-    // let apiUrl = 'https://file-upload-example-backend-dkhqoilqqn.now.sh/upload';
-    console.log("from upload image async");
 
-      apiUrl = `http://165.227.239.135:8080`;
+async function uploadImageAsync(uri) {
+    let apiUrl = 'https://file-upload-example-backend-dkhqoilqqn.now.sh/upload';
+
+    // Note:
+    // Uncomment this if you want to experiment with local server
+    //
+    // if (Constants.isDevice) {
+    //   apiUrl = `https://your-ngrok-subdomain.ngrok.io/upload`;
+    // } else {
+    //   apiUrl = `http://localhost:3000/upload`
+    // }
 
     let uriParts = uri.split('.');
     let fileType = uri[uri.length - 1];
-    let formData = new FormData();
 
+    let formData = new FormData();
     formData.append('photo', {
         uri,
         name: `photo.${fileType}`,
